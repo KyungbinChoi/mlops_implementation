@@ -39,16 +39,21 @@ def execute_batch(conn, df, table, page_size=100):
     # Comma-separated dataframe columns
     cols = ','.join(list(df.columns))
     # SQL quert to execute
+    df_in_db = pd.read_sql("SELECT COUNT(*) FROM housing_data;", conn)
+    print('table counts {}'.format(df_in_db['count'].values[0]))
     query  = "INSERT INTO %s(%s) VALUES(%%s,%%s,%%s,%%s,%%s,%%s,%%s,%%s,%%s)" % (table, cols)
     cursor = conn.cursor()
-    try:
-        extras.execute_batch(cursor, query, tuples, page_size)
-        conn.commit()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print("Error: %s" % error)
-        conn.rollback()
-        cursor.close()
-        return 1
+    if int(df_in_db['count'].values[0]) > 0:
+        pass
+    else:
+        try:
+            extras.execute_batch(cursor, query, tuples, page_size)
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            conn.rollback()
+            cursor.close()
+            return 1
     print("execute_batch() done")
 
 
