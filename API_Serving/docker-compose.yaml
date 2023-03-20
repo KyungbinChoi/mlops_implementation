@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  api-with-model:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-with-model
+    ports:
+      - 8000:8000
+    healthcheck:
+      test:
+        - curl -X POST http://localhost:8000/predict
+        - -H
+        - "Content-Type: application/json"
+        - -d
+        - '{"medinc": 4.4,
+            "houseage": 12,
+            "averooms": 3.22,
+            "avebedrms": 1.22,
+            "population": 3000,
+            "aveoccup": 2.33,
+            "latitude": 32.9,
+            "longitude": -119.21}'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  default:
+    name: mlops-network
+    external: true
